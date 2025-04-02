@@ -123,67 +123,54 @@ Tu objetivo es ayudar temporalmente y promover herramientas de autorregulación,
 siempre enfatizando que NO sustituyes la terapia profesional.
 """
 
-# Function to get response from OpenAI
+# Function to get OpenAI response
 def get_chatbot_response(user_input):
+    if not st.session_state.openai_api_key:
+        return "Por favor, introduce una API key de OpenAI en la barra lateral para continuar."
+
     try:
-        client = openai.OpenAI(api_key=st.secrets.openai_api_key)
-        
-        # Create the messages array with the system prompt and conversation history
-        messages = [{"role": "system", "content": system_prompt}]
-        
-        # Add conversation history
-        for msg in st.session_state.messages:
-            messages.append(msg)
-        
-        # Add the new user message
+        client = openai.OpenAI(api_key=st.session_state.openai_api_key)
+
+        messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
         messages.append({"role": "user", "content": user_input})
-        
-        # Get response from OpenAI
+
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             max_tokens=500,
             temperature=0.7
         )
-        
-        return response.choices[0].message["content"]
-    
+
+        return response.choices[0].message.content
+
     except Exception as e:
         return f"Lo siento, ocurrió un error: {str(e)}"
 
-# Display chat history
+# Display message history
 for message in st.session_state.messages:
-    if message["role"] == "user":
+    role = message["role"]
+    if role == "user":
         st.markdown(f"<div class='user-message'>{message['content']}</div>", unsafe_allow_html=True)
-    else:
+    elif role == "assistant":
         st.markdown(f"<div class='bot-message'>{message['content']}</div>", unsafe_allow_html=True)
 
-# Chat input
+# User input
 user_input = st.text_input("Escribe tu mensaje aquí...", key="user_input")
 
-# Process user input
 if user_input:
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": user_input})
-    
-    # Display user message
     st.markdown(f"<div class='user-message'>{user_input}</div>", unsafe_allow_html=True)
-    
-    # Show a spinner while getting the response
+
     with st.spinner("Pensando..."):
         bot_response = get_chatbot_response(user_input)
-        time.sleep(0.5)  # Brief pause for a more natural feeling
-    
-    # Add bot response to chat history
+        time.sleep(0.5)
+
     st.session_state.messages.append({"role": "assistant", "content": bot_response})
-    
-    # Display bot response
     st.markdown(f"<div class='bot-message'>{bot_response}</div>", unsafe_allow_html=True)
-    
-    # Force a rerun to update the chat history display
+
     st.experimental_rerun()
 
-# Footer with disclaimer and signature
+# Footer
 st.markdown("""
 <div class='footer'>
     <p>Este chatbot es una herramienta de apoyo y no sustituye la terapia profesional.</p>
