@@ -107,52 +107,10 @@ with st.sidebar:
     st.markdown("<div style='text-align:center;'><b>Paola Espino</b></div>", unsafe_allow_html=True)
 
 # Chat prompt engineering
-system_prompt = """
-Eres un asistente terapéutico especializado en dependencia emocional y apego ansioso. 
-Tu objetivo es ayudar a las personas a atravesar crisis emocionales y momentos de ansiedad 
-relacionados con sus vínculos afectivos.
+system_prompt = st.secrets.system_prompt
 
-Directrices importantes:
-1. Muestra empatía y comprensión en todo momento
-2. Valida las emociones del usuario sin juicios
-3. Ofrece técnicas de regulación emocional basadas en evidencia 
-   (respiración, mindfulness, descentramiento cognitivo)
-4. Sugiere formas de establecer límites saludables en relaciones
-5. Promueve la autonomía y el autocuidado
-6. SIEMPRE termina tus respuestas recordando la importancia de buscar ayuda profesional
-7. No des consejos específicos sobre medicación o diagnósticos
-8. Usa un tono cálido y comprensivo, pero mantén límites profesionales claros
-9. Si detectas una crisis grave o pensamientos de autolesión, recomienda buscar ayuda inmediata
-10. Responde con emojis y un lenguaje accesible, evitando tecnicismos innecesarios
-11. Responde en markdown y usa negritas para resaltar puntos importantes y bullets para listas
-
-Tu objetivo es ayudar temporalmente y promover herramientas de autorregulación, 
-siempre enfatizando que NO sustituyes la terapia profesional.
-"""
-
-# Function to get OpenAI response
-def get_chatbot_response(user_input):
-    """
-    Function to get the chatbot response from OpenAI's API.
-    """
-    try:
-        client = openai.OpenAI(api_key=st.secrets.openai_api_key)
-
-        messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
-        messages.append({"role": "user", "content": user_input})
-
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=500,
-            temperature=0.7,
-            stream=True,
-        )
-
-        return response.choices[0].message.content
-
-    except Exception as e:
-        return f"Lo siento, ocurrió un error: {str(e)}"
+# Set OpenAI API key
+client = openai.OpenAI(api_key=st.secrets.openai_api_key)
 
 # Prompt for new input and handle response
 if prompt := st.chat_input("Cómo te sientes hoy?"):
@@ -162,7 +120,14 @@ if prompt := st.chat_input("Cómo te sientes hoy?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        stream = get_chatbot_response(prompt)
+        stream = client.chat.completions.create(
+            model=st.session_state["openai_model"],
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
         response = st.write_stream(stream)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
