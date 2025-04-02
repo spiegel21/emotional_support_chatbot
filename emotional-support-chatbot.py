@@ -112,6 +112,18 @@ system_prompt = st.secrets.system_prompt
 # Set OpenAI API key
 client = openai.OpenAI(api_key=st.secrets.openai_api_key)
 
+# Function to stream content using st_markdown
+def stream_content(stream):
+    placeholder = st.empty()
+    full_response = ""
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            full_response += chunk.choices[0].delta.content
+            placeholder.markdown(full_response + "...")
+            time.sleep(0.05)
+    placeholder.markdown(full_response)
+    return full_response
+
 # Prompt for new input and handle response
 if prompt := st.chat_input("Cómo te sientes hoy?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -131,7 +143,7 @@ if prompt := st.chat_input("Cómo te sientes hoy?"):
             ],
             stream=True,
         )
-        response = st.write_stream(stream)
+        response = stream_content(stream)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
 
