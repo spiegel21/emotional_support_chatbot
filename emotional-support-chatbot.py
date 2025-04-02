@@ -121,7 +121,7 @@ if prompt := st.chat_input("Cómo te sientes hoy?"):
 
     with st.chat_message("assistant"):
         stream = client.chat.completions.create(
-            model=st.session_state["openai_model"],
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
