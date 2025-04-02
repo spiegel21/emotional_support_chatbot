@@ -81,17 +81,10 @@ te recomendamos buscar ayuda de un profesional de la salud mental.</p>
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-if 'openai_api_key' not in st.session_state:
-    st.session_state.openai_api_key = ""
-
 # OpenAI API key input
 with st.sidebar:
-    st.header("Configuración")
-    api_key = st.text_input("Introduce tu API key de OpenAI:", type="password")
-    if api_key:
-        st.session_state.openai_api_key = api_key
     
-    st.markdown("### Sobre este chatbot")
+    st.header("### Sobre este chatbot")
     st.markdown("""
     Este chatbot utiliza inteligencia artificial para ofrecer apoyo emocional 
     durante momentos difíciles relacionados con:
