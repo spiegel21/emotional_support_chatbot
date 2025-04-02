@@ -84,7 +84,7 @@ if 'messages' not in st.session_state:
 # OpenAI API key input
 with st.sidebar:
     
-    st.header("### Sobre este chatbot")
+    st.header("Sobre este chatbot")
     st.markdown("""
     Este chatbot utiliza inteligencia artificial para ofrecer apoyo emocional 
     durante momentos difíciles relacionados con:
@@ -125,11 +125,8 @@ siempre enfatizando que NO sustituyes la terapia profesional.
 
 # Function to get response from OpenAI
 def get_chatbot_response(user_input):
-    if not st.session_state.openai_api_key:
-        return "Por favor, introduce una API key de OpenAI en la barra lateral para continuar."
-    
     try:
-        client = openai.OpenAI(api_key=st.session_state.openai_api_key)
+        client = openai.OpenAI(api_key=st.secrets.openai_api_key)
         
         # Create the messages array with the system prompt and conversation history
         messages = [{"role": "system", "content": system_prompt}]
