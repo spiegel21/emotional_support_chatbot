@@ -125,11 +125,11 @@ siempre enfatizando que NO sustituyes la terapia profesional.
 
 # Function to get OpenAI response
 def get_chatbot_response(user_input):
-    if not st.session_state.openai_api_key:
-        return "Por favor, introduce una API key de OpenAI en la barra lateral para continuar."
-
+    """
+    Function to get the chatbot response from OpenAI's API.
+    """
     try:
-        client = openai.OpenAI(api_key=st.session_state.openai_api_key)
+        client = openai.OpenAI(api_key=st.secrets.openai_api_key)
 
         messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
         messages.append({"role": "user", "content": user_input})
