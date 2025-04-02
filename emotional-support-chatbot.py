@@ -81,12 +81,10 @@ te recomendamos buscar ayuda de un profesional de la salud mental.</p>
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-# Display message history
-for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
-    else:
-        st.markdown(f"<div class='bot-message'>{msg['content']}</div>", unsafe_allow_html=True)
+# Display existing chat messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 # OpenAI API key input
 with st.sidebar:
@@ -147,7 +145,8 @@ def get_chatbot_response(user_input):
             model="gpt-3.5-turbo",
             messages=messages,
             max_tokens=500,
-            temperature=0.7
+            temperature=0.7,
+            stream=True,
         )
 
         return response.choices[0].message.content
@@ -155,29 +154,18 @@ def get_chatbot_response(user_input):
     except Exception as e:
         return f"Lo siento, ocurrió un error: {str(e)}"
 
-# Display message history
-for message in st.session_state.messages:
-    role = message["role"]
-    if role == "user":
-        st.markdown(f"<div class='user-message'>{message['content']}</div>", unsafe_allow_html=True)
-    elif role == "assistant":
-        st.markdown(f"<div class='bot-message'>{message['content']}</div>", unsafe_allow_html=True)
+# Prompt for new input and handle response
+if prompt := st.chat_input("Cómo te sientes hoy?"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-# User input
-user_input = st.text_input("Escribe tu mensaje aquí...", key="user_input")
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    st.markdown(f"<div class='user-message'>{user_input}</div>", unsafe_allow_html=True)
+    with st.chat_message("assistant"):
+        stream = get_chatbot_response(prompt)
+        response = st.write_stream(stream)
 
-    with st.spinner("Pensando..."):
-        bot_response = get_chatbot_response(user_input)
-        time.sleep(0.5)
-
-    st.session_state.messages.append({"role": "assistant", "content": bot_response})
-    st.markdown(f"<div class='bot-message'>{bot_response}</div>", unsafe_allow_html=True)
-
-    st.experimental_rerun()
+    st.session_state.messages.append({"role": "assistant", "content": response})
 
 # Footer
 st.markdown("""
