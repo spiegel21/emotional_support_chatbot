@@ -81,6 +81,13 @@ te recomendamos buscar ayuda de un profesional de la salud mental.</p>
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
+# Display message history
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='bot-message'>{msg['content']}</div>", unsafe_allow_html=True)
+
 # OpenAI API key input
 with st.sidebar:
     
@@ -118,6 +125,8 @@ Directrices importantes:
 7. No des consejos específicos sobre medicación o diagnósticos
 8. Usa un tono cálido y comprensivo, pero mantén límites profesionales claros
 9. Si detectas una crisis grave o pensamientos de autolesión, recomienda buscar ayuda inmediata
+10. Responde con emojis y un lenguaje accesible, evitando tecnicismos innecesarios
+11. Responde en markdown y usa negritas para resaltar puntos importantes y bullets para listas
 
 Tu objetivo es ayudar temporalmente y promover herramientas de autorregulación, 
 siempre enfatizando que NO sustituyes la terapia profesional.
